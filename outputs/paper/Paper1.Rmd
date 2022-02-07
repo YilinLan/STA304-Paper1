@@ -1,5 +1,5 @@
 ---
-title: "Untitled"
+title: "Paper1-Analyzation of Toronto Fire Incident Dataset"
 author: Yilin Lan
 date: "02/06/2022"
 output: pdf_document
@@ -7,17 +7,15 @@ abstract: "In this report, I introduce the Toronto public safety background and 
 bibliography: ref_list.bib
 ---
 
-Here is some body text.^[This footnote will appear at the bottom of the page.:https://github.com/YilinLan/STA304-Paper1]
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 # Introduction
-With the development of technology and society, citizens and government concern more about the public safety. Among different types of public safety hazard, fire accident one of the most common thing in people’s daily life. In January 19, 2022, in the city of Toronto, a fire broke out at a home on Gladstone Avenue, east of Dufferin Street at 7 p.m. A woman is dead and a man is in critical condition in this fire accident [@d]. Fire accidents happened almost every day, people get injury from the accidents often. They even cause death. Statistically, there are about 24,000 house fires each year in Canada, resulting in an average of 377 deaths and 3,048 injuries per year. Fire causes huge casualties and property loss. Since then, due to the global warming and technology improvement, people use more electrical goods during their life so that there is an increasing trend in number of fire incidents globally every year.
+With the development of technology and society, citizens and government concern more about the public safety. Among different types of public safety hazard, fire accident one of the most common thing in people’s daily life. In January 19, 2022, in Toronto, a fire broke out at a home on Gladstone Avenue, east of Dufferin Street at 7 p.m. A woman is dead and a man is in critical condition in this fire accident [@d]. Fire accidents happened almost every day, people get injury from the accidents often. They even cause death. Statistically, there are about 24,000 house fires each year in Canada, resulting in an average of 377 deaths and 3,048 injuries per year. Fire causes huge casualties and property loss. Since then, due to the global warming and technology improvement, people use more electrical goods during their life so that there is an increasing trend in number of fire incidents globally every year.
 
-Base on the previse background of public safety. Government needs to collect the fire incidents information in order to improve the city’s safe infrastructures as well as promote fire prevention. The dataset I used is provided by Ontario Fire Marshal (OFM) and share to the public on City of Toronto Open Data Portal. The OFM provides leadership and expertise on fire safety and it promote changes in laws, fire equipment in order to minimize the impact of fire and other public safety hazards on people, property and the environment in Ontario [@a]. According to Fire Protection and Prevention Act (FPPA), the Fire Marshal is responsible for the investigation of the cause, origin and circumstances of any fire, explosion, etc [@a]. Every year, the OFM investigates approximately 600 fire cases, including 80-100 death and some injury of the firefighters [@a]. These investigations help experts to determine why fire accidents happened and how to prevent them in the future. They also help identify trends in fire emergencies and ensure fire protection services are maintained for every Ontarian [@a].
+Base on the previse background of public safety, government needs to collect the fire incidents information in order to improve the city’s safe infrastructures as well as promote fire prevention. The dataset I used is provided by Ontario Fire Marshal (OFM) and share to the public on City of Toronto Open Data Portal. The OFM provides leadership and expertise on fire safety and it promote changes in laws, fire equipment in order to minimize the impact of fire and other public safety hazards on people, property and the environment in Ontario [@a]. According to Fire Protection and Prevention Act (FPPA), the Fire Marshal is responsible for the investigation of the cause, origin and circumstances of any fire, explosion, etc [@a]. Every year, the OFM investigates approximately 600 fire cases, including 80-100 death and some injury of the firefighters [@a]. These investigations help experts to determine why fire accidents happened and how to prevent them in the future. They also help identify trends in fire emergencies and ensure fire protection services are maintained for every Ontarian [@a].
 
-Given the importance of fire incidents statistics in characterizing the most common cause of fire incident and making improvement about fire protection infrastructure, it is important to understand how the fire incident dataset is reported and how it may be interpreted. For this report, I will use fire incident dataset from City of Toronto Open Data Portal to analyze how the estimated dollar loss in a fire incident related to civilian casualties, number of exposure fires and different building status. Also, I summarize the major possible cause and the common origin of fire. Moreover, I will discuss the potential bias in how these data are collected and the impact on the final data analyzation. Some possible improvement when collect data in the future has also been given. The dataset will be processed and analyzed in R (R Core Team 2020) primarily using the tidyverse [@c] and dplyr [@f] packages. Figures and tables will be created with ggplot (Wickham 2016) and kableextra (Zhu 2020). The packages knitr (Xie 2021) are used to generate the R markdown report.^[https://github.com/YilinLan/STA304-Paper1]
+Given the importance of fire incidents statistics in characterizing the most common cause of fire incident and making improvement about fire protection infrastructure, it is important to understand how the fire incident dataset is reported and how it may be interpreted. For this report, I will use this dataset to analyze how the estimated dollar loss in a fire incident related to civilian casualties, number of exposure fires and different building status. Also, I summarize the major possible causes and the common origins of fire. Moreover, I will discuss the potential bias in how these data are collected and the impact on the final data analyzation. Some possible improvement when collect data in the future has also been given. The dataset will be processed and analyzed in R (R Core Team 2020) primarily using the tidyverse [@c] and dplyr [@f] packages. Figures and tables will be created with ggplot (Wickham 2016) and kableextra (Zhu 2020). The packages knitr (Xie 2021) are used to generate the R markdown report.^[https://github.com/YilinLan/STA304-Paper1]
 
 \newpage
 # Data Source
@@ -59,40 +57,57 @@ data
 
 ```{r 2,message=FALSE, echo=FALSE, include=FALSE}
 data0= na.omit(data)
+data1<-data0%>%
+  select(Estimated_Dollar_Loss,Exposures,Civilian_Casualties,Area_of_Origin,Building_Status,Possible_Cause )
 ```
 
 \newpage
 # Data Characteristic
+## Data Overview
 The fire incident data set contains aggregate data of all fire incidents reported to the OFM between year of 2011 and 2022 [@e]. There are 17536 observations in the dataset and 43 attributes. Since the dataset includes comprehensive information about every fire incident, I will mainly focus on some important variables that closely related to fire incident and people’s safety. The selected variable includes area of origin, building status, possible cause, civilian casualties, estimated Dollar loss and number of exposure fires. The variable types are either integer or character. As I mentioned in the previous part, the dataset contains lot of missing values and that will impact on the data analyzation process so that I remove all the missing data. The impact on the final result interpretation will be mentioned again below. A sample view of the dataset is displayed below.
 
 ```{r 3, message=FALSE, echo=FALSE,warning=FALSE}
-head(data0)
+head(data1)
 ```
 
-
-```{r hist, fig.cap="Count for Different Original On Fire Area", fig.width=10, fig.height=8,message=FALSE, echo=FALSE}
-data0%>%ggplot(aes(x=Area_of_Origin))+geom_bar()+theme_classic()+coord_flip()+labs(x= "Original On Fire Areas", title="Numbers of Different Original On Fire Area")
+## Count for Different Original On Fire Area and Building Status
+According to the information provided by the OFM, it is necessary to summarize the number of different original on fire area. It is a useful information to help government promote fire safety requirement. When citizens see the result of the report, they will know which place in their home has higher possibility on fire. Later in their life, people will pay more attention when using electric in that place.
+```{r hist, fig.cap="Count for Different Original On Fire Area", fig.width=5, fig.height=4.5,message=FALSE, echo=FALSE}
+data0%>%ggplot(aes(x=Area_of_Origin,fill=Building_Status))+geom_bar()+theme_classic()+coord_flip()+labs(x= "Original On Fire Areas", title="Numbers of Different Original On Fire Area")
 ```
+Figure 1 illustrates that garage, porch or balcony and kitchen are the most common origin of fire. The count are about 35, 30 and 28 respectively. Garage and balcony are usually filled with sundries and people seldom spend time in there while people use fire to cook in the kitchen. Due to the wrong display of items and lack of management, these places become the most common fire origin. As the article state, kitchen is the heart of home and it is the most common spot in the house for fires to start [@g]. Moreover,other than normal building status, the under construction and renovation buildings are also easy to occur a fire incident. To prevent the fire incident, people should always keep an eye on the stove, oven, and other appliances like toaster ovens, and move combustible items away from the stove. Government should improve the infrastructure and reduce the number of under renovation and under construction buildings.
 
-
-
-```{r point, fig.cap="Estimated Dollar Loss by Civilian Casualties and Building Status", fig.width=6, fig.height=4,message=FALSE, echo=FALSE}
+## Relationship between Estimated Dollar Loss and Civilian Casualties
+People care about the property loss and civilian casualties observed at scene in a fire incident because these two variable directly reflect how serious a fire incident is. Usually, more civilian casualties means more serious of a fire incident. To investigate whether the graph follow our common knowledge, I use Figure 2 illustrates the relationship between them. 
+```{r point, fig.cap="Estimated Dollar Loss by Civilian Casualties and Building Status", fig.width=4, fig.height=2,message=FALSE, echo=FALSE}
 data0%>%ggplot(aes(y=Estimated_Dollar_Loss,x=Civilian_Casualties,color=Building_Status))+geom_point()+theme_classic()+labs(y="Estimated Dollar Loss", x="Civilian Casualties Observed at Scene",title="Under Renovation and Construction Buildings Have Higher Property Loss")
 ```
-According to the news about a fire incident, people care more about the property loss and civilian casualties observed at scene. Figure 1 illustrates the relationship between them. 
-
 I choose variables Estimated_Dollar_Loss, Civilian_Casualties to draw a scatterplot and categorize the plot using variable building status. From the graph, the estimated property loss spreads around 5000-500000 dollars and there is no obvious relationship between civilian casualties. The estimated property loss tends to be lower when there are more civilian casualties. Moreover, there are three outliers in the plot. One has extremely high estimated dollar loss and the other two have high civilian casualties. The three outliers will generally rise the average of both two variables. The dark yellow and green dots are located at the upper side of the scatterplot. That means when the building status is under renovation or under construction, there will be more property loss. Besides, when the property loss is high, there likely to be no civilian casualties.
 
-```{r point2, fig.cap="Estimated Dollar Loss by Number of Exposure Fires and Possible Cause", fig.width=7, fig.height=5,message=FALSE, echo=FALSE}
+
+## Relationship between Estimated Dollar Loss and Number of Exposure Fires
+The estimated dollar loss can also associated with the number of exposure fires.Government can use this result to see whether the firefighters use in an effective way to put out a fire. They can even do some training for the firefighters.
+```{r point2, fig.cap="Estimated Dollar Loss by Number of Exposure Fires and Possible Cause", fig.width=4, fig.height=2.7,message=FALSE, echo=FALSE}
 data0%>%ggplot(aes(y=Estimated_Dollar_Loss,x=Exposures,color=Possible_Cause))+geom_point()+theme_classic()+labs(y="Estimated Dollar Loss", x="Number of Exposure Fires",title="The Common Possible Causes are Unattended, Improperly Discarded")
 ```
-Then, I want to investigate the relationship between estimated dollar loss and number of exposure fires. I choose these two variables and categorize the plot using variable possible cause. In Figure 2, there is a slightly negative relationship between estimated dollar loss and number of exposure fires. When the number of exposure fires increases, the estimated dollar loss decreases. This result is different from the news and common knowledge. Usually, the estimated dollar loss is positively related to the number of exposures fires. This may due to the incompleteness of the data. Moreover, other than the undetermined cause, there are many green and blue dots in the scatterplot and that means the major possible causes are unattended, improperly discarded and mechanical failure.
+Then, I want to investigate the relationship between estimated dollar loss and number of exposure fires. I choose these two variables and categorize the plot using variable possible cause. In Figure 3, there is a slightly negative relationship between estimated dollar loss and number of exposure fires. When the number of exposure fires increases, the estimated dollar loss decreases. This result is different from the news and common knowledge. Usually, the estimated dollar loss is positively related to the number of exposures fires. This may due to the incompleteness of the data. Moreover, other than the undetermined cause, there are many green and blue dots in the scatterplot and that means the major possible causes are unattended, improperly discarded and mechanical failure.
 
-
+## Estimated Dollar Loss in Different Building Status
+The boxplot help people to see the number of property loss in different building status in a clearly way. Government is encouraged to build more normal buiildings and reduce the under renovation or under construction buildings.
 ```{r box, fig.cap="Estimated Dollar Loss by Building Status", fig.width=9, fig.height=5,message=FALSE, echo=FALSE}
 data0%>%ggplot(aes(x=Building_Status,y=Estimated_Dollar_Loss))+geom_boxplot()+theme_classic()+coord_flip()+labs(x= "Building Status",y="Estimated Dollar Loss", title="Under Construction Building Has the Larget Medium of Dollar Loss")
 ```
-Last, in figure 3, I illustrate the medium of estimated property loss under different building status. It can be seen that if the fire happened in an under-construction building, the medium property loss will be high at 500000 dollars.^[https://github.com/YilinLan/STA304-Paper1]
+Last, in figure 4, I illustrate the medium of estimated property loss under different building status. It can be seen that if the fire happened in an under-construction building, the medium property loss will be high at 500000 dollars.^[https://github.com/YilinLan/STA304-Paper1]
+
+```{r fig.cap="Summary Table of Estimated Dollar Loss in Different Building Status", fig.width=6, fig.height=4,message=FALSE, echo=FALSE}
+summary_table<-data1%>%group_by(Building_Status)%>%summarise(min=min(Estimated_Dollar_Loss), median=median(Estimated_Dollar_Loss),mean=mean(Estimated_Dollar_Loss),max=max(Estimated_Dollar_Loss),Q1=quantile(Estimated_Dollar_Loss,0.25),Q3=quantile(Estimated_Dollar_Loss,0.25),IQR=Q3-Q1,sd=sd(Estimated_Dollar_Loss),Small_Outliers=sum(Estimated_Dollar_Loss<Q1-1.5*IQR),Large_Outliers=sum(Estimated_Dollar_Loss<Q3+1.5*IQR))
+knitr::kable(summary_table)
+```
+
+
+
+
+
 
 \newpage
 # Reference
